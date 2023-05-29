@@ -1,9 +1,10 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response, request } from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 
 
 import userRouter from "./routes/user.route";
+import { ApiError } from "./errors/api.error";
 
 const app: Express = express();
 
@@ -12,21 +13,19 @@ mongoose.connect("mongodb://admin:admin@localhost:27017/crud-usuarios?authSource
 .then(() => console.log("--- Conectado a la DB ---"))
 .catch(err => console.log(err));
 
-// Schema
-
-
-// const testUser = new User({username: "ncardozoEY", password: "EY2023"});
-/*
-testUser.save()
-    .then(doc => console.log(doc))
-    .catch(err => console.log(err));
-*/
-
 // Middlewares
 app.use(bodyParser.json())
 
 // Routers
 app.use("/users", userRouter);
+
+app.all("*", (req: Request, res: Response) => {
+    res.status(404).json({message: `No existe la URL ${req.url}`});
+});
+
+app.use((err: ApiError, req:Request, res: Response, next: NextFunction) => {
+    res.status(err.statusCode).json({message: err.message});
+});
 
 app.listen(3000, () => {
     console.log("--- Listening port 3000 ---");

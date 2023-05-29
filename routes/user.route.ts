@@ -1,38 +1,27 @@
-import { Router, Request, Response } from "express";
-import { getUsuario, getUsuarios, saveUsuario } from "../controllers/user.controller";
+import { Router, Request, Response, NextFunction } from "express";
+import { getUsuario, getUsuarios, saveUsuario, deleteUsuario, updateUsuario } from "../controllers/user.controller";
 
 
 const userRouter: Router = Router();
 
-userRouter.get("/", async (req: Request, res:Response) =>{
-    let usuarios: any[] = [];
-
-    await getUsuarios().then(data => usuarios = data);
-
-    res.status(200).json({data: usuarios});
-    
+userRouter.get("/", async (req: Request, res:Response, next: NextFunction) =>{
+    getUsuarios(req,res, next);
 });
 
-userRouter.get("/:id", async (req: Request, res:Response) =>{
-    await getUsuario(req.params.id).then(data =>{
-        if(!data){
-            console.log("No se encontró el usuario");
-            res.status(404).send();
-        } else {
-            res.status(200).json({data});
-        }
-    }).catch(err => {
-        console.error(err);
-        res.status(500).json({message: err});
-    });
+userRouter.get("/:id", (req: Request, res:Response, next: NextFunction) =>{
+    getUsuario(req,res, next);
 });
 
-userRouter.post("/", async (req: Request, res:Response) =>{
-    await saveUsuario({
-        username: req.body.username,
-        password: req.body.password
-    }).then(doc => res.status(200).json(doc))
-    .catch(err => res.status(500).json({message: err}));
+userRouter.post("/", (req: Request, res:Response, next: NextFunction) =>{
+    saveUsuario(req,res, next);
+});
+
+userRouter.put("/:id", (req: Request, res:Response, next: NextFunction) => {
+    updateUsuario(req,res,next);
+});
+
+userRouter.delete("/:id", (req: Request, res:Response, next: NextFunction) =>{
+    deleteUsuario(req,res, next);
 });
 
 export default userRouter;
